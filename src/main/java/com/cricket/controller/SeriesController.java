@@ -1,6 +1,7 @@
 package com.cricket.controller;
 
 import com.cricket.dto.BaseResponseDTO;
+import com.cricket.dto.MatchesDTO;
 import com.cricket.dto.SeriesDTO;
 import com.cricket.service.intrface.SeriesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,14 @@ public class SeriesController {
         return seriesService.getAllSeries();
     }
 
-    @GetMapping("/get-series-by-id/{id}")
-    public ResponseEntity<SeriesDTO> getSeriesById(@PathVariable("id") UUID seriesId) {
+    @GetMapping("/get-series-by-id/{seriesId}")
+    public ResponseEntity<SeriesDTO> getSeriesById(@PathVariable UUID seriesId) {
         return seriesService.getSeries(seriesId);
+    }
+
+    @GetMapping("/get-matches-by-series-id/{seriesId}")
+    public ResponseEntity<List<MatchesDTO>> getMatchesSeriesId(@PathVariable UUID seriesId) {
+        return seriesService.getMatchesBySeriesId(seriesId);
     }
 
 

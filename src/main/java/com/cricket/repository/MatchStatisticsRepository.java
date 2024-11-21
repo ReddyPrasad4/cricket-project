@@ -12,8 +12,8 @@ public interface MatchStatisticsRepository extends JpaRepository<MatchStatistics
 
     List<MatchStatistics> findByPlayerId(UUID playerId);
 
-
     MatchStatistics findByPlayerIdAndMatchesId(UUID playerId, UUID matchId);
 
     List<MatchStatistics> findByMatchesId(UUID matchId);
+
 }

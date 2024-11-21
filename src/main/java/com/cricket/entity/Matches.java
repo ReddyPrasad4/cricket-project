@@ -49,7 +49,7 @@ public class Matches {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "matches", cascade = CascadeType.ALL)
+    @ManyToMany
     private List<Team> teams;
 
     @OneToMany(mappedBy = "matches" , cascade = CascadeType.ALL)

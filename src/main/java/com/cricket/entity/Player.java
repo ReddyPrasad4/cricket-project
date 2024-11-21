@@ -38,7 +38,7 @@ public class Player {
     private String battingStyle;
     private String bowlingStyle;
     private String nationality;
-    private int age;
+    private Integer age;
 
     @CreationTimestamp
     @Column(updatable = false)

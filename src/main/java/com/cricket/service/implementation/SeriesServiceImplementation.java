@@ -3,6 +3,8 @@ package com.cricket.service.implementation;
 import com.cricket.dto.BaseResponseDTO;
 import com.cricket.dto.MatchesDTO;
 import com.cricket.dto.SeriesDTO;
+import com.cricket.dto.TeamDTO;
+import com.cricket.entity.Matches;
 import com.cricket.entity.Series;
 import com.cricket.repository.SeriesRepository;
 import com.cricket.service.intrface.SeriesService;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
@@ -58,7 +61,7 @@ public class SeriesServiceImplementation implements SeriesService {
     public ResponseEntity<List<SeriesDTO>> getAllSeries() {
         SeriesDTO seriesDTO = new SeriesDTO();
         try {
-            List<Series> seriesList = seriesRepository.findAll();
+            List<Series> seriesList = seriesRepository.findAllSeriesByOrder();
             if (!ObjectUtils.isEmpty(seriesList)) {
                 List<SeriesDTO> fetchedSeriesDTO = seriesList.stream().map(series -> convertion.convertToDto(series, SeriesDTO.class)).toList();
                 return new ResponseEntity<>(fetchedSeriesDTO, HttpStatus.OK);
@@ -69,7 +72,7 @@ public class SeriesServiceImplementation implements SeriesService {
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
             seriesDTO.setMessage(ApplicationConstants.ERROR_FETCHING_SERIES);
-            return new ResponseEntity<>(List.of(seriesDTO), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(List.of(seriesDTO), HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -96,6 +99,37 @@ public class SeriesServiceImplementation implements SeriesService {
 
     }
 
+    @Override
+    public ResponseEntity<List<MatchesDTO>> getMatchesBySeriesId(UUID seriesId) {
+        MatchesDTO matchesDTO = new MatchesDTO();
+        try {
+            if (!ObjectUtils.isEmpty(seriesId)) {
+                Series series = seriesRepository.findById(seriesId).orElseThrow(() -> new IllegalArgumentException(ApplicationConstants.SERIES_NOT_FOUND));
+                List<Matches> listOfMatches = series.getMatches();
+                if(!CollectionUtils.isEmpty(listOfMatches))
+                {
+                    List<MatchesDTO> matchesDTOList =  series.getMatches().stream().map(matches -> {
+                        MatchesDTO belongingMatchDTO =  convertion.convertToDto(matches, MatchesDTO.class);
+                        belongingMatchDTO.setTeamsDTO(matches.getTeams().stream().map(team -> convertion.convertToDto(team, TeamDTO.class)).toList());
+                        return belongingMatchDTO;
+                    }).toList();
+                    return new ResponseEntity<>(matchesDTOList, HttpStatus.OK);
+                }
+                else {
+                    matchesDTO.setMessage(ApplicationConstants.EMPTY_OUTPUT);
+                    return new ResponseEntity<>(List.of(matchesDTO), HttpStatus.NO_CONTENT);
+                }
+
+            } else {
+                matchesDTO.setMessage(ApplicationConstants.NULL_INPUT);
+                return new ResponseEntity<>(List.of(matchesDTO), HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+            matchesDTO.setMessage(e.getLocalizedMessage());
+            return new ResponseEntity<>(List.of(matchesDTO), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @Override
     public ResponseEntity<BaseResponseDTO> updateSeries(SeriesDTO seriesDTO) {

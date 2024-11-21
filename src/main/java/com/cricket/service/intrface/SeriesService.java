@@ -1,6 +1,7 @@
 package com.cricket.service.intrface;
 
 import com.cricket.dto.BaseResponseDTO;
+import com.cricket.dto.MatchesDTO;
 import com.cricket.dto.SeriesDTO;
 import org.springframework.http.ResponseEntity;
 
@@ -13,4 +14,5 @@ public interface SeriesService {
      ResponseEntity<SeriesDTO> getSeries(UUID seriesId);
      ResponseEntity<BaseResponseDTO> updateSeries(SeriesDTO seriesDTO);
 
+     ResponseEntity<List<MatchesDTO>> getMatchesBySeriesId(UUID seriesId);
 }

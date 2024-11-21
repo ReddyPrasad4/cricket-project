@@ -5,6 +5,7 @@ import com.cricket.dto.MatchStatisticsDTO;
 import com.cricket.dto.MatchesDTO;
 import com.cricket.dto.TeamDTO;
 import com.cricket.service.intrface.MatchesService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,14 +23,22 @@ import java.util.UUID;
 @RequestMapping("/api/matches")
 public class MatchController {
 
+
     @Autowired
     private MatchesService matchesService;
 
+
+    @Operation(summary = "Save the match for both the teams",description = "Scheduling the matches for both teams")
+    @PostMapping("/save-match-by-team-id/{firstTeamId}/{secondTeamId}")
+    public ResponseEntity<BaseResponseDTO> addMatchesByTeamId(@RequestBody MatchesDTO matchesDTO,@PathVariable UUID firstTeamId,@PathVariable UUID secondTeamId) {
+        return matchesService.saveMatcheByTeamsId(matchesDTO,firstTeamId,secondTeamId);
+    }
 
     @PostMapping("/save-match")
     public ResponseEntity<BaseResponseDTO> addMatch(@RequestBody MatchesDTO matchesDTO) {
         return matchesService.saveMatches(matchesDTO);
     }
+
 
 
     @GetMapping("/get-all-matches")
