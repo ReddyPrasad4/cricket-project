@@ -3,9 +3,12 @@ package com.cricket.service.implementation;
 import com.cricket.dto.BaseResponseDTO;
 import com.cricket.dto.MatchStatisticsDTO;
 import com.cricket.dto.PlayerDTO;
+import com.cricket.dto.TeamDTO;
 import com.cricket.entity.MatchStatistics;
 import com.cricket.entity.Player;
+import com.cricket.entity.Team;
 import com.cricket.repository.PlayerRepository;
+import com.cricket.repository.TeamRepository;
 import com.cricket.service.intrface.PlayerService;
 import com.cricket.util.ApplicationConstants;
 import com.cricket.util.Convertion;
@@ -30,6 +33,9 @@ public class PlayerServiceImplementation implements PlayerService {
     private PlayerRepository playersRepository;
 
     @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
     private Convertion convertion;
 
     @Autowired
@@ -42,6 +48,30 @@ public class PlayerServiceImplementation implements PlayerService {
         try {
             if (!ObjectUtils.isEmpty(playerDTO) && !StringUtils.isEmpty(playerDTO.getName()) && (!StringUtils.isEmpty(playerDTO.getBattingStyle()) || !StringUtils.isEmpty(playerDTO.getBowlingStyle()))) {
                 playersRepository.save(convertion.convertToEntity(playerDTO, Player.class));
+                responseDTO.setMessage(ApplicationConstants.PLAYER_SAVED_SUCCESS);
+            } else {
+                responseDTO.setMessage(ApplicationConstants.NULL_INPUT);
+            }
+            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+            responseDTO.setMessage(ApplicationConstants.ERROR_SAVING_PLAYER);
+            return new ResponseEntity<>(responseDTO, HttpStatus.BAD_REQUEST);
+        }
+
+    }
+    @Override
+    public ResponseEntity<BaseResponseDTO> saveListOfPlayers (List<PlayerDTO> playerDTOList,UUID teamId) {
+        BaseResponseDTO responseDTO = new BaseResponseDTO();
+        try {
+            if (!CollectionUtils.isEmpty(playerDTOList)) {
+                Team team = teamRepository.findById(teamId).orElseThrow(()-> new RuntimeException(ApplicationConstants.TEAM_NOT_FOUND));
+                List<Player> playerList  = playerDTOList.stream().map(playerDTO -> {
+                    Player player = convertion.convertToEntity(playerDTO, Player.class);
+                    player.setTeam(team);
+                    return player;
+                }).toList();
+                playersRepository.saveAll(playerList);
                 responseDTO.setMessage(ApplicationConstants.PLAYER_SAVED_SUCCESS);
             } else {
                 responseDTO.setMessage(ApplicationConstants.NULL_INPUT);
@@ -83,7 +113,9 @@ public class PlayerServiceImplementation implements PlayerService {
             if (!ObjectUtils.isEmpty(playerId)) {
                 Player player = playersRepository.findById(playerId).orElseThrow(() -> new RuntimeException(ApplicationConstants.PLAYER_NOT_FOUND));
                 if (!ObjectUtils.isEmpty(player)) {
-                    return new ResponseEntity<>(convertion.convertToDto(player, PlayerDTO.class), HttpStatus.OK);
+                    PlayerDTO convertedPlayerDto = convertion.convertToDto(player, PlayerDTO.class);
+                    convertedPlayerDto.setTeamDTO(convertion.convertToDto(player.getTeam(), TeamDTO.class));
+                    return new ResponseEntity<>(convertedPlayerDto, HttpStatus.OK);
                 }
             }
             playerDTO.setMessage(ApplicationConstants.NULL_INPUT);

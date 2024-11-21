@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface TeamService {
 
 
-    ResponseEntity<BaseResponseDTO> createTeam(TeamDTO teamDTO,UUID matchId);
+    ResponseEntity<BaseResponseDTO> createTeam(TeamDTO teamDTO);
 
     ResponseEntity<List<TeamDTO>> getAllTeams();
 

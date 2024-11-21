@@ -2,6 +2,8 @@ package com.cricket.controller;
 
 import com.cricket.dto.BaseResponseDTO;
 import com.cricket.dto.MatchStatisticsDTO;
+import com.cricket.dto.TeamDTO;
+import com.cricket.dto.TeamScoreDTO;
 import com.cricket.service.intrface.MatchStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +36,17 @@ public class MatchStatisticsController {
     public ResponseEntity<List<MatchStatisticsDTO>> getAllStatisticsDetails() {
         return matchStatisticsService.getAllStatisticsDetails();
     }
+    @GetMapping("/get-match-statics/{matchId}/{playerId}")
+    public ResponseEntity<MatchStatisticsDTO> getMatchStatisticsOfAPlayer(@PathVariable UUID matchId,@PathVariable UUID playerId) {
+        return matchStatisticsService.getMatchStatisticsOfAPlayer(matchId,playerId);
+    }
 
-    @GetMapping("/get-total-statics/{id}")
-    public ResponseEntity<MatchStatisticsDTO> getStatisticsById(@PathVariable("id") UUID playerId) {
+    @GetMapping("/get-total-statics/{playerId}")
+    public ResponseEntity<MatchStatisticsDTO> getStatisticsById(@PathVariable UUID playerId) {
         return matchStatisticsService.getOverAllStatisticsOfAPlayer(playerId);
     }
-    @GetMapping("/get-every-statistics-by-player-id/{id}")
-    public ResponseEntity<List<MatchStatisticsDTO>> getAllStatisticsOfAPlayer(@PathVariable("id") UUID playerId) {
+    @GetMapping("/get-every-statistics-by-player-id/{playerId}")
+    public ResponseEntity<List<MatchStatisticsDTO>> getAllStatisticsOfAPlayer(@PathVariable UUID playerId) {
         return matchStatisticsService.getEveryStatisticsByPlayerId(playerId);
     }
 
@@ -54,5 +60,16 @@ public class MatchStatisticsController {
     public ResponseEntity<BaseResponseDTO> updateStatistics( @RequestBody MatchStatisticsDTO matchStatisticsDTO) {
         return matchStatisticsService.updateStatistics( matchStatisticsDTO);
     }
+
+    @GetMapping("/get-team-Score-by-match-id/{matchId}")
+    public ResponseEntity<List<TeamDTO>> getTeamScore(@PathVariable UUID matchId){
+        return matchStatisticsService.getEachTeamScore(matchId);
+    }
+
+    @GetMapping("/get-team-total-Score-by-match-id/{matchId}")
+    public ResponseEntity<List<TeamScoreDTO>> getTeamTotalScore(@PathVariable UUID matchId){
+        return matchStatisticsService.getTeamScore(matchId);
+    }
+
 }
 

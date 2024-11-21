@@ -12,6 +12,7 @@ import java.util.UUID;
 public interface MatchesService {
 
     ResponseEntity<BaseResponseDTO> saveMatches(MatchesDTO matchesDTO);
+    ResponseEntity<BaseResponseDTO> saveMatchByTeamsId(MatchesDTO matchesDTO, UUID firstTeamId, UUID secondTeamId);
 
     ResponseEntity<List<MatchesDTO>> getAllMatches();
 

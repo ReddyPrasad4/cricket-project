@@ -27,8 +27,13 @@ public class PlayersController {
     public ResponseEntity<BaseResponseDTO> addPlayer(@RequestBody PlayerDTO playerDTO){
         return playerService.savePlayer(playerDTO);
     }
+    @PostMapping("/save-all-players-by-team-id/{teamId}")
+    public ResponseEntity<BaseResponseDTO> addPlayers(@RequestBody List<PlayerDTO> playerDTOList,@PathVariable UUID teamId){
+        return playerService.saveListOfPlayers(playerDTOList,teamId);
+    }
     @GetMapping("/get-all-players")
     public ResponseEntity<List<PlayerDTO>> fetchAllPlayers(){
+
         return playerService.getAllDetails();
     }
     @GetMapping("/get-player-by-id/{playerId}")
@@ -45,9 +50,5 @@ public class PlayersController {
     public ResponseEntity<List<MatchStatisticsDTO>> fetchPlayerByMatchStatistics(@PathVariable UUID playerId){
         return playerService.getPlayerMatchStatistics(playerId);
     }
-
-
-
-
 
 }

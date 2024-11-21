@@ -2,8 +2,13 @@ package com.cricket.service.implementation;
 
 import com.cricket.dto.BaseResponseDTO;
 import com.cricket.dto.MatchStatisticsDTO;
+import com.cricket.dto.PlayerDTO;
+import com.cricket.dto.TeamDTO;
+import com.cricket.dto.TeamScoreDTO;
 import com.cricket.entity.MatchStatistics;
 import com.cricket.entity.Matches;
+import com.cricket.entity.Player;
+import com.cricket.entity.Team;
 import com.cricket.repository.MatchRepository;
 import com.cricket.repository.MatchStatisticsRepository;
 import com.cricket.repository.PlayerRepository;
@@ -51,9 +56,39 @@ public class MatchStatisticsServiceImplementation implements MatchStatisticsServ
         try {
             if (!ObjectUtils.isEmpty(matchStatisticsDTO)) {
                 MatchStatistics matchStatistics = convertion.convertToEntity(matchStatisticsDTO, MatchStatistics.class);
+                if(matchStatistics.getRunsScored()==0 ||matchStatistics.getBallsFaced()==0)
+                {
+                    matchStatistics.setStrikeRate(0.0);
+                }
+                else {
+                    matchStatistics.setStrikeRate((double) (matchStatistics.getRunsScored() /matchStatistics.getBallsFaced()));
+
+                }
+                if(matchStatistics.getRunsConcede()==0 || matchStatistics.getBallsBowled()==0)
+                {
+                    matchStatistics.setEconomy(0.0);
+                }
+                else {
+                    matchStatistics.setEconomy(matchStatistics.getRunsConcede() /((double) matchStatistics.getBallsBowled() /6));
+                }
+                if(matchStatistics.getRunsConcede()==0 || matchStatistics.getWicketsTaken()==0)
+                {
+                    matchStatistics.setBowlingAverage(0.0);
+                }
+                else {
+                    matchStatistics.setBowlingAverage((double) (matchStatistics.getRunsConcede() /matchStatistics.getWicketsTaken()));
+                }
+                if(matchStatistics.getRunsScored()==0 || matchStatistics.getNumberOfInnings()==0)
+                {
+                    matchStatistics.setBattingAverage(0.0);
+                }
+                else {
+                    matchStatistics.setBattingAverage((double) matchStatistics.getRunsScored() / matchStatistics.getNumberOfInnings());
+
+                }
                 matchStatisticsRepository.save(matchStatistics);
                 baseResponseDTO.setMessage(ApplicationConstants.MATCH_STATISTICS_SAVED_SUCCESS);
-                return new ResponseEntity<>(baseResponseDTO, HttpStatus.CREATED);
+                return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
             } else {
                 baseResponseDTO.setMessage(ApplicationConstants.NULL_INPUT);
                 return new ResponseEntity<>(baseResponseDTO, HttpStatus.BAD_REQUEST);
@@ -118,12 +153,24 @@ public class MatchStatisticsServiceImplementation implements MatchStatisticsServ
         matchStatisticsDTO.setNumberOfInnings(numberOfInnings);
         matchStatisticsDTO.setRunsScored(runsScored);
         matchStatisticsDTO.setStrikeRate(strikeRate);
-        matchStatisticsDTO.setEconomy(runsConceded /((double) ballsBowled /6));
+        if(runsConceded==0||ballsBowled==0)
+        {
+            matchStatisticsDTO.setEconomy(0.0);
+        }
+        else {
+            matchStatisticsDTO.setEconomy(runsConceded /((double) ballsBowled /6));
+        }
         matchStatisticsDTO.setBattingAverage((double) runsScored / numberOfInnings);
         matchStatisticsDTO.setBallsBowled(ballsBowled);
         matchStatisticsDTO.setRunsConcede(runsConceded);
         matchStatisticsDTO.setWicketsTaken(wicketsTaken);
-        matchStatisticsDTO.setBowlingAverage((double) runsConceded /wicketsTaken);
+        if(runsConceded==0||wicketsTaken==0)
+        {
+            matchStatisticsDTO.setBowlingAverage(0.0);
+        }
+        else {
+            matchStatisticsDTO.setBowlingAverage((double) runsConceded /wicketsTaken);
+        }
         matchStatisticsDTO.setHundreds(hundreds);
         matchStatisticsDTO.setFifties(fifties);
         matchStatisticsDTO.setSixes(sixes);
@@ -224,7 +271,10 @@ public class MatchStatisticsServiceImplementation implements MatchStatisticsServ
             List<MatchStatisticsDTO> seriesStatisticsList = new ArrayList<>();
             matchesList.forEach( matches -> {
                 MatchStatistics matchStatisticsList = matchStatisticsRepository.findByPlayerIdAndMatchesId(playerId,matches.getId());
-                seriesStatisticsList.add(convertion.convertToDto(matchStatisticsList,MatchStatisticsDTO.class));
+                if (!ObjectUtils.isEmpty(matchStatisticsList))
+                {
+                    seriesStatisticsList.add(convertion.convertToDto(matchStatisticsList,MatchStatisticsDTO.class));
+                }
             });
             return seriesStatisticsList;
         }
@@ -252,8 +302,99 @@ public class MatchStatisticsServiceImplementation implements MatchStatisticsServ
             }
         } catch (Exception e) {
             responseMatchStatisticsDTO.setMessage(ApplicationConstants.ERROR_UPDATING_MATCH_STATISTICS + e.getMessage());
-            return new ResponseEntity<>(List.of(responseMatchStatisticsDTO), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(List.of(responseMatchStatisticsDTO), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Override
+    public ResponseEntity<MatchStatisticsDTO> getMatchStatisticsOfAPlayer(UUID playerId , UUID matchId) {
+        MatchStatisticsDTO responseMatchStatisticsDTO = new MatchStatisticsDTO();
+        try
+        {
+            if (!ObjectUtils.isEmpty(playerId) && !ObjectUtils.isEmpty(playerId) && !ObjectUtils.isEmpty(matchId))
+            {
+                MatchStatistics matchStatistics = matchStatisticsRepository.findByPlayerIdAndMatchesId(matchId,playerId);
+                if (!ObjectUtils.isEmpty(matchStatistics))
+                {
+                    MatchStatisticsDTO playerMatchStatistics = convertion.convertToDto(matchStatistics, MatchStatisticsDTO.class);
+                    return new ResponseEntity<>(playerMatchStatistics,HttpStatus.OK);
+                }
+                responseMatchStatisticsDTO.setMessage(ApplicationConstants.MATCH_STATISTICS_NOT_FOUND);
+                return new ResponseEntity<>(responseMatchStatisticsDTO,HttpStatus.NO_CONTENT);
+            }
+            else {
+                responseMatchStatisticsDTO.setMessage(ApplicationConstants.NULL_INPUT);
+                return new ResponseEntity<>(responseMatchStatisticsDTO,HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            responseMatchStatisticsDTO.setMessage(ApplicationConstants.ERROR_UPDATING_MATCH_STATISTICS + e.getMessage());
+            return new ResponseEntity<>(responseMatchStatisticsDTO, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @Override
+    public ResponseEntity<List<TeamDTO>> getEachTeamScore(UUID matchId) {
+        TeamDTO responseTeamDTO = new TeamDTO();
+        try {
+            Matches matches = matchRepository.findById(matchId).orElseThrow(()-> new RuntimeException(ApplicationConstants.MATCH_NOT_FOUND));
+            if(!ObjectUtils.isEmpty(matches)){
+                List<Team> teamList = matches.getTeams();
+                List<TeamDTO> teamDTOList= teamList.stream().map(team -> {
+                    List<Player> playerList =  team.getPlayers();
+                    List<PlayerDTO> playerDTOList =   playerList.stream().map(player -> {
+                        MatchStatistics playerMatchStat = matchStatisticsRepository.findByPlayerIdAndMatchesId(player.getId(),matchId);
+                        PlayerDTO playerDTO = convertion.convertToDto(player, PlayerDTO.class);
+                        MatchStatisticsDTO matchStatisticsDTO = convertion.convertToDto(playerMatchStat,MatchStatisticsDTO.class);
+                        playerDTO.setMatchStatisticsDTOList(List.of(matchStatisticsDTO));
+                        return playerDTO;
+                    }).toList();
+                    TeamDTO teamDTO = convertion.convertToDto(team, TeamDTO.class);
+                    teamDTO.setPlayerDTOList(playerDTOList);
+                    return  teamDTO;
+                }).toList();
+                return new ResponseEntity<>(teamDTOList,HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+        }
+        responseTeamDTO.setMessage(ApplicationConstants.ERROR_FETCHING_MATCH_STATISTICS);
+        return new ResponseEntity<>(List.of(responseTeamDTO), HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public ResponseEntity<List<TeamScoreDTO>> getTeamScore(UUID matchId) {
+        TeamScoreDTO teamScoreDTO = new TeamScoreDTO();
+        List<TeamScoreDTO> teamScoreDTOList = new ArrayList<>();
+        try {
+            Matches matches = matchRepository.findById(matchId).orElseThrow(RuntimeException::new);
+            if(!ObjectUtils.isEmpty(matches)){
+                List<Team> team = matches.getTeams();
+                for (Team fetechedTeam : team) {
+                    List<Player> playerList = fetechedTeam.getPlayers();
+                    int totalruns = 0;
+                    for (Player player : playerList) {
+                        MatchStatistics matchStatistics =  matchStatisticsRepository.findByPlayerIdAndMatchesId(player.getId(),matchId);
+                        if(!ObjectUtils.isEmpty(matchStatistics))
+                        {
+                            totalruns+=matchStatistics.getRunsScored();
+                        }
+                    }
+                    TeamScoreDTO teamScore = new TeamScoreDTO();
+                    teamScore.setTotalScore(totalruns);
+                    teamScore.setTeamName(fetechedTeam.getName());
+                    teamScoreDTOList.add(teamScore);
+
+                }
+                return new ResponseEntity<>(teamScoreDTOList,HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+        }
+        teamScoreDTO.setMessage(ApplicationConstants.ERROR_FETCHING_MATCH_STATISTICS);
+        return new ResponseEntity<>(List.of(teamScoreDTO), HttpStatus.BAD_REQUEST);
     }
 
 }

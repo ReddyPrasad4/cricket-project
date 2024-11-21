@@ -31,8 +31,8 @@ public class Team {
     @JdbcTypeCode(Types.VARCHAR)
     private UUID id;
     private String name;
-    private int wins;
-    private int losses;
+    private Integer wins;
+    private Integer losses;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -41,7 +41,7 @@ public class Team {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "teams" ,cascade = CascadeType.ALL)
     private List<Matches> matches;
 
     @OneToMany(mappedBy = "team" ,cascade = CascadeType.ALL)

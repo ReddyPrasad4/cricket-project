@@ -17,8 +17,8 @@ import java.util.UUID;
 public class TeamDTO  extends BaseResponseDTO{
     private UUID id;
     private String name;
-    private int wins;
-    private int losses;
+    private Integer wins;
+    private Integer losses;
 
     private List<MatchesDTO> matchesDTOList;
 

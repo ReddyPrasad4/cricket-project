@@ -15,20 +15,20 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchStatisticsDTO extends BaseResponseDTO{
     private UUID id;
-    private int numberOfInnings;
-    private int runsScored;
-    private int ballsFaced;
-    private int ballsBowled;
-    private int runsConcede;
-    private double strikeRate;
-    private double battingAverage;
-    private double bowlingAverage;
-    private int wicketsTaken ;
-    private double economy;
-    private int hundreds;
-    private int fifties;
-    private int sixes;
-    private int fours;
+    private Integer numberOfInnings;
+    private Integer runsScored;
+    private Integer ballsFaced;
+    private Integer ballsBowled;
+    private Integer runsConcede;
+    private Double strikeRate;
+    private Double battingAverage;
+    private Double bowlingAverage;
+    private Integer wicketsTaken ;
+    private Double economy;
+    private Integer hundreds;
+    private Integer fifties;
+    private Integer sixes;
+    private Integer fours;
 
     private MatchesDTO matchesDTO;
 

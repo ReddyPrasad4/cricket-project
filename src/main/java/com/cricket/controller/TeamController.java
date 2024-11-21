@@ -26,9 +26,9 @@ public class TeamController {
     private TeamService teamService;
 
 
-    @PostMapping("/save-team/{matchId}")
-    public ResponseEntity<BaseResponseDTO> createTeam(@RequestBody TeamDTO teamDTO,@PathVariable UUID matchId) {
-        return teamService.createTeam(teamDTO,matchId);
+    @PostMapping("/save-team")
+    public ResponseEntity<BaseResponseDTO> createTeam(@RequestBody TeamDTO teamDTO) {
+        return teamService.createTeam(teamDTO);
     }
 
 
@@ -47,7 +47,7 @@ public class TeamController {
         return teamService.updateTeam(teamDTO);
     }
 
-    @GetMapping("/get-players-by-id/{teamId}")
+    @GetMapping("/get-players-by-teamId/{teamId}")
     public ResponseEntity<List<PlayerDTO>> getPlayersByTeamId(@PathVariable UUID teamId) {
         return teamService.getPlayersByTeamId(teamId);
     }
