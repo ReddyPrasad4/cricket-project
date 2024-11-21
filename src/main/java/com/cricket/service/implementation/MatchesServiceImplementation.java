@@ -65,7 +65,7 @@ public class MatchesServiceImplementation implements MatchesService {
     }
 
     @Override
-    public ResponseEntity<BaseResponseDTO> saveMatcheByTeamsId(MatchesDTO matchesDTO, UUID firstTeamId, UUID secondTeamId) {
+    public ResponseEntity<BaseResponseDTO> saveMatchByTeamsId(MatchesDTO matchesDTO, UUID firstTeamId, UUID secondTeamId) {
         BaseResponseDTO baseResponseDTO = new BaseResponseDTO();
         try {
             if (!ObjectUtils.isEmpty(matchesDTO) && !StringUtils.isEmpty(matchesDTO.getVenue()) && !ObjectUtils.isEmpty(firstTeamId) && !ObjectUtils.isEmpty(secondTeamId)) {

@@ -31,7 +31,7 @@ public class MatchController {
     @Operation(summary = "Save the match for both the teams",description = "Scheduling the matches for both teams")
     @PostMapping("/save-match-by-team-id/{firstTeamId}/{secondTeamId}")
     public ResponseEntity<BaseResponseDTO> addMatchesByTeamId(@RequestBody MatchesDTO matchesDTO,@PathVariable UUID firstTeamId,@PathVariable UUID secondTeamId) {
-        return matchesService.saveMatcheByTeamsId(matchesDTO,firstTeamId,secondTeamId);
+        return matchesService.saveMatchByTeamsId(matchesDTO,firstTeamId,secondTeamId);
     }
 
     @PostMapping("/save-match")
