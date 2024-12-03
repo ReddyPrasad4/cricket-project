@@ -368,21 +368,21 @@ public class MatchStatisticsServiceImplementation implements MatchStatisticsServ
         TeamScoreDTO teamScoreDTO = new TeamScoreDTO();
         List<TeamScoreDTO> teamScoreDTOList = new ArrayList<>();
         try {
-            Matches matches = matchRepository.findById(matchId).orElseThrow(RuntimeException::new);
+            Matches matches = matchRepository.findById(matchId).orElseThrow(()-> new RuntimeException(ApplicationConstants.MATCH_NOT_FOUND));
             if(!ObjectUtils.isEmpty(matches)){
                 List<Team> team = matches.getTeams();
                 for (Team fetechedTeam : team) {
                     List<Player> playerList = fetechedTeam.getPlayers();
-                    int totalruns = 0;
+                    int totalRuns = 0;
                     for (Player player : playerList) {
                         MatchStatistics matchStatistics =  matchStatisticsRepository.findByPlayerIdAndMatchesId(player.getId(),matchId);
                         if(!ObjectUtils.isEmpty(matchStatistics))
                         {
-                            totalruns+=matchStatistics.getRunsScored();
+                            totalRuns+=matchStatistics.getRunsScored();
                         }
                     }
                     TeamScoreDTO teamScore = new TeamScoreDTO();
-                    teamScore.setTotalScore(totalruns);
+                    teamScore.setTotalScore(totalRuns);
                     teamScore.setTeamName(fetechedTeam.getName());
                     teamScoreDTOList.add(teamScore);
 

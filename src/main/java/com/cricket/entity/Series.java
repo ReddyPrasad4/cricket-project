@@ -45,6 +45,6 @@ public class Series {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "series",cascade = CascadeType.ALL)
-    List<Matches> matches;
+    private List<Matches> matches;
 
 }
